@@ -39,41 +39,84 @@ export const readExcelFile = async (filePath) => {
 // });
 
 
-
-export const convertJsonToExcel = async (jsonData) => {
-  // console.log('json', jsonData)
-  const excelName = Object.keys(jsonData)[0]
-  const categories = Object.keys(jsonData[excelName])
-
-  // console.log('name', excelName)
-  // console.log('name', categories)
+export const convertJsonToExcel = async (jsonData, columnOrder) => {
+  const excelName = Object.keys(jsonData)[0];
+  const categories = Object.keys(jsonData[excelName]);
   const workbook = new ExcelJS.Workbook();
 
-  categories.forEach((incName) => { 
+
+
+  categories.forEach((incName) => {
     const worksheet = workbook.addWorksheet(`${incName}`);
-    const arrayInc = jsonData[excelName][incName]
+    const arrayInc = jsonData[excelName][incName];
 
-    if (arrayInc.length > 0) { 
-      const headers = Object.keys(arrayInc[0]);
-      // console.log('headers', incName, headers)
-      worksheet.columns = headers.map(header => ({ header, key: header }));
+    if (arrayInc.length > 0) {
+      // Usar el orden definido en columnOrder en lugar del orden natural del objeto
+      worksheet.columns = columnOrder
+        .filter(header => arrayInc[0].hasOwnProperty(header)) // Solo incluir columnas que existan
+        .map(header => ({ header, key: header }));
 
-    arrayInc.forEach(data => {
-          worksheet.addRow(data);
+      // Agregar filas manteniendo el orden de las columnas
+      arrayInc.forEach(data => {
+        // Crear un objeto con solo las propiedades en el orden deseado
+        const orderedData = {};
+        columnOrder.forEach(key => {
+          if (data.hasOwnProperty(key)) {
+            orderedData[key] = data[key];
+          }
+        });
+        worksheet.addRow(orderedData);
       });
     }
-  })
+  });
 
-    // Crear la carpeta si no existe
-    const dirPath = path.join(process.cwd(), 'excels');
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath);
-    }
+  // Crear la carpeta si no existe
+  const dirPath = path.join(process.cwd(), 'excels');
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath);
+  }
 
-    const filePath = path.join(dirPath, `${excelName}.xlsx`);
-    await workbook.xlsx.writeFile(filePath);
-    console.log('Excel file created successfully at', filePath);
-  };
+  const filePath = path.join(dirPath, `${excelName}.xlsx`);
+  await workbook.xlsx.writeFile(filePath);
+  console.log('Excel file created successfully at', filePath);
+};
+
+
+
+// export const convertJsonToExcel = async (jsonData) => {
+//   // console.log('json', jsonData)
+//   const excelName = Object.keys(jsonData)[0]
+//   const categories = Object.keys(jsonData[excelName])
+
+//   // console.log('name', excelName)
+//   // console.log('name', categories)
+//   const workbook = new ExcelJS.Workbook();
+
+//   categories.forEach((incName) => { 
+//     const worksheet = workbook.addWorksheet(`${incName}`);
+//     const arrayInc = jsonData[excelName][incName]
+
+//     if (arrayInc.length > 0) { 
+//       const headers = Object.keys(arrayInc[0]);
+//       // console.log('headers', incName, headers)
+//       worksheet.columns = headers.map(header => ({ header, key: header }));
+
+//     arrayInc.forEach(data => {
+//           worksheet.addRow(data);
+//       });
+//     }
+//   })
+
+//     // Crear la carpeta si no existe
+//     const dirPath = path.join(process.cwd(), 'excels');
+//     if (!fs.existsSync(dirPath)) {
+//       fs.mkdirSync(dirPath);
+//     }
+
+//     const filePath = path.join(dirPath, `${excelName}.xlsx`);
+//     await workbook.xlsx.writeFile(filePath);
+//     console.log('Excel file created successfully at', filePath);
+//   };
 
 
 

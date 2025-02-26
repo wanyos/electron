@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import isBetween from './plugins/isBetween.js';
+import { getAll } from './query_sql.js';
 
 dayjs.extend(isBetween);
 
@@ -11,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Construir la ruta del archivo de Excel
-const excelFilePath = path.join(__dirname, 'consulta_2024-2025.xlsx');
+const excelFilePath = path.join(__dirname, 'consulta1_2024-2025.xlsx');
 
 const convertTimestampToDate = (timestamp) => {
     return dayjs.unix(timestamp).format('DD/MM/YYYY'); 
@@ -36,9 +37,8 @@ const convert = async () => {
             const grupo = item.Grupo;
             item.FechaApertura = item.FechaApertura ? convertTimestampToDate(item.FechaApertura) : '';
             item.FechaCierre = item.FechaCierre ? convertTimestampToDate(item.FechaCierre) : '';
-            item.Ultima_actuacion = item.Ultima_actuacion ? convertTimestampToDate(item.Ultima_actuacion) : '';
-            item.Hora_creacion = item.Hora_creacion ? convertTimestampToDate(item.Hora_creacion) : '';
-
+           // item.Ultima_actuacion = item.Ultima_actuacion ? convertTimestampToDate(item.Ultima_actuacion) : '';
+           // item.Hora_creacion = item.Hora_creacion ? convertTimestampToDate(item.Hora_creacion) : '';
             // console.log('fecha cierre', item.fechaCierre)
 
              const clave = Object.keys(data).find(key => data[key] === grupo);
@@ -60,7 +60,7 @@ const convert = async () => {
 //    }
     }
 
-const createFile = async (openDate, closeDate) => {
+const createFile = async (openDate, closeDate, columnOrder) => {
     const servideskInc = await convert();
     const result = [];
 
@@ -97,28 +97,38 @@ const createFile = async (openDate, closeDate) => {
             });
 
              result.push({ [key]: keyObject });
-
         }
     });
 
     // console.log(result);
     // console.log(result[0])
-
     // convertJsonToExcel(result[0])
 
     result.forEach((place) => { 
-        convertJsonToExcel(place)
+        convertJsonToExcel(place, columnOrder)
     })
 
-
-
-
+    const inc = await getAll('tincidencia')
+    console.log('incidencts', inc)
 
 }
 
 
-
+// Num_Incidencia	Estado	FechaApertura	FechaCierre	Usuario	Extension	Resumen	Grupo	Tecnico_Asignado	Tipo_Inc	Descripcion_Tipo
+const columnOrder = [
+  'Num_Incidencia',
+  'Estado',
+  'FechaApertura',
+  'FechaCierre',
+  'Usuario',
+  'Extension',
+  'Resumen',
+  'Grupo',
+  'Tecnico_Asignado',
+  'Tipo_Inc',
+  'Descripcion_Tipo'
+];
 
 const openDate = dayjs('17/02/2025', 'DD/MM/YYYY');
 const closeDate = dayjs('23/02/2025', 'DD/MM/YYYY');
-createFile(openDate, closeDate);
+createFile(openDate, closeDate, columnOrder);
