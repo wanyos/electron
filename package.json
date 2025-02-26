@@ -1,0 +1,25 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "connect:db": "cross-env NODE_ENV=development node db/mysql.js",
+    "serve:db": "cross-env NODE_ENV=production node db/mysql.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "mysql2": "^3.12.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^34.2.0"
+  }
+}
