@@ -25,10 +25,27 @@ LEFT JOIN tincident_type T ON I.id_incident_type = T.id
 WHERE (I.inicio >= '2024-01-01 00:00:00') AND (I.inicio <'2025-12-31 23:59:59')
 ORDER BY I.id_incidencia;`
 
+const decodeHtmlEntities = (str) => {
+  if (!str) return str;
+  return str.replace(/&#x20;/g, ' ')
+            .replace(/&iacute;/g, 'í')
+            .replace(/&eacute;/g, 'é');
+};
+
 
 export const getAll = async (table) => {
   try {
     const [rows] = await pool.query(getIncResolutor)
+
+    return rows.map(row => {
+      row.Usuario = decodeHtmlEntities(row.Usuario);
+      row.Resumen = decodeHtmlEntities(row.Resumen);
+      row.Grupo = decodeHtmlEntities(row.Grupo);
+      row.Tecnico_Asignado = decodeHtmlEntities(row.Tecnico_Asignado);
+      row.Localizacion = decodeHtmlEntities(row.Localizacion);
+      return row;
+    });
+
     return rows
   } catch (err) {
     console.log(err)
